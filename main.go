@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"main/db"
 	"main/util"
 	"strconv"
@@ -13,22 +14,14 @@ import (
 
 	"log"
 
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
 )
 
-//やること
-//1動画のコメントを全て取得できるようにする。
-//-ちょうどいい動画を探す
-
-//動画 (ダイアン)
-//HK8CzJm8gdM
-//
-
-const developerKey = ""
-
-func createService() (service *youtube.Service) {
+func createService(developerKey string) (service *youtube.Service) {
 	ctx := context.Background()
+
 	//service, err := youtube.NewService(ctx)
 	service, err := youtube.NewService(ctx, option.WithAPIKey(developerKey))
 	if err != nil {
@@ -153,8 +146,20 @@ type VideoData struct {
 
 func main() {
 	// flag.Parse()
+
+	b, err := ioutil.ReadFile("client_secrets.json")
+	if err != nil {
+		log.Fatalf("Unable to read client secret file: %v", err)
+	}
+
+	// If modifying these scopes, delete your previously saved credentials
+	// at ~/.credentials/youtube-go-quickstart.json
+	config, err := google.ConfigFromJSON(b, youtube.YoutubeReadonlyScope)
+	if err != nil {
+		log.Fatalf("Unable to parse client secret file to config: %v", err)
+	}
 	videoid := "HK8CzJm8gdM"
-	service := createService()
+	service := createService(config.ClientID)
 	nextPageToken := ""
 	var responseBodyArray []db.Comment
 	for {
@@ -235,12 +240,20 @@ func main() {
 //時間を曜日で分ける
 //月で分ける
 //時間で分ける
+//user
 
 //より簡単にする
+// - git ignore
+// - 設定ファイルから環境変数を取得
+// - ログを書き込む
+// - 配列のアドレス
 
 //typeを分類する方法を考える
 //デザインを考える。
 //動画を毎日保存する。
+
+//　今はやらない
+// - viideoIDを三日分とかとる
 
 // 	// Group video, channel, and playlist results in separate lists.
 // 	videos := make(map[string]string)
