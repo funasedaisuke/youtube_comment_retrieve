@@ -1,20 +1,22 @@
 package db
 
 import (
-	// "database/sql"
-
 	"fmt"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql" // Using MySQL driver
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
 type Comment struct {
 	LinkCnt      int       `json:"linkCnt"`
 	Comment      string    `json:"comment"`
-	Updated_time time.Time `json:"time"`
 	VideoID      string    `json:"videoid"`
+	UserName     string    `json:"username"`
+	Updated_time time.Time `json:"updated_time"`
+	Month_time   int       `json:"month_time"`
+	WeekDay_time string    `json:"weekday_time"`
+	Hour_time    int       `json:"hour_time"`
 }
 
 func NewMysqlConnect(dsn string) (*sqlx.DB, error) {
@@ -51,12 +53,10 @@ func DbxInsert(dbx *sqlx.DB, comments []Comment) {
 	// if err != nil {
 	// 	fmt.Print(err)
 	// }
+
 	for _, item := range comments {
 		// query := fmt.Sprintf("insert into %s(comment,likecnt,updated_tiime) values(%s,%d,%s)", tablename, item.Comment, item.LinkCnt, item.Updated_time)
-
-		query := fmt.Sprintf("insert into %s (comment, likecnt,updated_time,videoid) values (\"%s\",%d,\"%s\",\"%s\")", tablename, item.Comment, item.LinkCnt, item.Updated_time.Format("2006-01-02 15:04:05"), item.VideoID)
-
-		fmt.Print(query)
+		query := fmt.Sprintf("insert into %s (likecnt,comment, videoid,username,updated_time,month_time,weekday_time,hour_time) values (%d,\"%s\",\"%s\",\"%s\",\"%s\",%d,\"%s\",%d)", tablename, item.LinkCnt, item.Comment, item.VideoID, item.UserName, item.Updated_time.Format("2006-01-02 15:04:05"), item.Month_time, item.WeekDay_time, item.Hour_time)
 		tx.MustExec(query)
 	}
 	tx.Commit()

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"main/db"
+	"main/util"
+	"strconv"
 	"strings"
 	"time"
 
@@ -54,13 +56,21 @@ func getCommentThread(nextPageToken, videoID string, service *youtube.Service, r
 	// fmt.Println(string(body))
 	// fmt.Println("---------------")
 	// index := 0
-	//jst, _ := time.LoadLocation("Asia/Tokyo")
+	jst, _ := time.LoadLocation("Asia/Tokyo")
 	for _, item := range response.Items {
+		//時間を曜日で分ける
+		//月で分ける
+		//時間で分ける
+
 		commentInstance := db.Comment{}
 		commentInstance.Comment = strings.Replace(item.Snippet.TopLevelComment.Snippet.TextDisplay, "\"", "", -1)
 		commentInstance.LinkCnt = int(item.Snippet.TopLevelComment.Snippet.LikeCount)
-		commentInstance.Updated_time, _ = time.Parse(time.RFC3339, item.Snippet.TopLevelComment.Snippet.PublishedAt)
-		//commentInstance.Updated_time, _ = time.ParseInLocation("2006-01-02 15:04:05", item.Snippet.TopLevelComment.Snippet.PublishedAt, jst)
+		commentInstance.UserName = item.Snippet.TopLevelComment.Snippet.AuthorDisplayName
+		commentInstance.Updated_time = util.TimeToJapan(item.Snippet.TopLevelComment.Snippet.PublishedAt, jst)
+		commentInstance.Month_time, _ = strconv.Atoi(commentInstance.Updated_time.Month().String())
+		commentInstance.WeekDay_time = commentInstance.Updated_time.Weekday().String()
+		commentInstance.Hour_time = commentInstance.Updated_time.Hour()
+
 		commentInstance.VideoID = item.Snippet.TopLevelComment.Snippet.VideoId
 		responseBodyArray = append(responseBodyArray, commentInstance)
 		// fmt.Printf("comment: %v\n", commentInstance.Comment)
@@ -147,21 +157,9 @@ func main() {
 	service := createService()
 	nextPageToken := ""
 	var responseBodyArray []db.Comment
-	index := 0
 	for {
-		index += 1
-
-		//responseBodyArray, nextPageToken := getCommentThread(nextPageToken, videoid, service)
 		responseBodyArray, nextPageToken = getCommentThread(nextPageToken, videoid, service, responseBodyArray)
 		fmt.Println(len(responseBodyArray))
-		// fmt.Println("-----------------------------------------")
-		fmt.Println(index)
-		// fmt.Println(nextPageToken)
-
-		// fmt.Println("-----------------------------------------")
-		if index == 5 {
-			break
-		}
 		if nextPageToken == "" {
 			break
 		}
