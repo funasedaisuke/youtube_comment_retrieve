@@ -17,7 +17,7 @@ func GetRouter() chi.Router {
 	)
 	router.Use(middleware.Logger)
 	router.HandleFunc("/*", Index)
-	router.Post("/update", postDb)
+	router.Get("/update", postDb)
 	router.Get("/index", getData)
 	return router
 

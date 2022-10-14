@@ -10,7 +10,7 @@ import (
 )
 
 type Comment struct {
-	LinkCnt      int       `json:"linkCnt"`
+	LikeCnt      int       `json:"lkecnt"`
 	Comment      string    `json:"comment"`
 	VideoID      string    `json:"videoid"`
 	UserName     string    `json:"username"`
@@ -35,7 +35,10 @@ func NewMysqlConnect(dsn string) *sqlx.DB {
 func DbxSelect(dbx *sqlx.DB, query string) []Comment {
 	result := []Comment{}
 	//"select * from tests"
-	dbx.Select(&result, query)
+	err := dbx.Select(&result, query)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return result
 
@@ -56,7 +59,7 @@ func DbxInsert(dbx *sqlx.DB, comments []Comment) {
 
 	for _, item := range comments {
 		// query := fmt.Sprintf("insert into %s(comment,likecnt,updated_tiime) values(%s,%d,%s)", tablename, item.Comment, item.LinkCnt, item.Updated_time)
-		query := fmt.Sprintf("insert into %s (likecnt,comment, videoid,username,updated_time,month_time,weekday_time,hour_time) values (%d,\"%s\",\"%s\",\"%s\",\"%s\",%d,\"%s\",%d)", tablename, item.LinkCnt, item.Comment, item.VideoID, item.UserName, item.Updated_time.Format("2006-01-02 15:04:05"), item.Month_time, item.WeekDay_time, item.Hour_time)
+		query := fmt.Sprintf("insert into %s (likecnt,comment, videoid,username,updated_time,month_time,weekday_time,hour_time) values (%d,\"%s\",\"%s\",\"%s\",\"%s\",%d,\"%s\",%d)", tablename, item.LikeCnt, item.Comment, item.VideoID, item.UserName, item.Updated_time.Format("2006-01-02 15:04:05"), item.Month_time, item.WeekDay_time, item.Hour_time)
 		tx.MustExec(query)
 	}
 	tx.Commit()

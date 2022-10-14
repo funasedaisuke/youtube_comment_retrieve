@@ -5,3 +5,56 @@
 2022/10/14 10:27:26 main.go:121: Logging start
 2022/10/14 10:28:12 main.go:121: Logging start
 2022/10/14 10:47:00 main.go:124: Logging start
+2022/10/14 11:14:17 main.go:66: Logging start
+2022/10/14 11:14:17 main.go:71: DB connect success
+2022/10/14 11:14:22 api.go:22: Unable to read client secret file: open client_secrets.json: no such file or directory
+2022/10/14 11:15:07 main.go:66: Logging start
+2022/10/14 11:15:07 main.go:71: DB connect success
+2022/10/14 11:15:11 api.go:22: Unable to read client secret file: open ../client_secrets.json: no such file or directory
+2022/10/14 11:15:58 main.go:66: Logging start
+2022/10/14 11:15:58 main.go:71: DB connect success
+2022/10/14 11:16:03 api.go:22: Unable to read client secret file: open ../client_secrets.json: no such file or directory
+2022/10/14 11:16:23 main.go:66: Logging start
+2022/10/14 11:16:23 main.go:71: DB connect success
+2022/10/14 11:16:27 api.go:22: Unable to read client secret file: open client_secrets.json: no such file or directory
+2022/10/14 11:16:54 main.go:66: Logging start
+2022/10/14 11:16:54 main.go:71: DB connect success
+2022/10/14 11:24:20 main.go:66: Logging start
+2022/10/14 11:24:20 main.go:71: DB connect success
+2022/10/14 11:24:54 main.go:66: Logging start
+2022/10/14 11:24:54 main.go:71: DB connect success
+2022/10/14 11:25:43 main.go:66: Logging start
+2022/10/14 11:25:43 main.go:71: DB connect success
+2022/10/14 11:25:59 main.go:66: Logging start
+2022/10/14 11:25:59 main.go:71: DB connect success
+2022/10/14 11:27:04 main.go:66: Logging start
+2022/10/14 11:27:04 main.go:71: DB connect success
+2022/10/14 11:27:04 main.go:81: router success
+2022/10/14 11:27:55 main.go:66: Logging start
+2022/10/14 11:27:55 main.go:71: DB connect success
+2022/10/14 11:27:55 main.go:81: router success
+2022/10/14 11:30:07 main.go:66: Logging start
+2022/10/14 11:30:07 main.go:71: DB connect success
+2022/10/14 11:31:49 main.go:66: Logging start
+2022/10/14 11:31:49 main.go:71: DB connect success
+2022/10/14 11:31:53 handler.go:31: [91 93]
+2022/10/14 11:31:54 handler.go:31: [91 93]
+2022/10/14 11:33:06 main.go:66: Logging start
+2022/10/14 11:33:06 main.go:71: DB connect success
+2022/10/14 11:33:42 main.go:66: Logging start
+2022/10/14 11:33:42 main.go:71: DB connect success
+2022/10/14 11:34:31 main.go:66: Logging start
+2022/10/14 11:34:31 main.go:71: DB connect success
+2022/10/14 11:35:00 main.go:66: Logging start
+2022/10/14 11:35:00 main.go:71: DB connect success
+2022/10/14 11:39:43 main.go:66: Logging start
+2022/10/14 11:39:43 main.go:71: DB connect success
+2022/10/14 11:39:47 db.go:40: missing destination name likecnt in *[]db.Comment
+2022/10/14 11:41:21 main.go:66: Logging start
+2022/10/14 11:41:21 main.go:71: DB connect success
+2022/10/14 11:41:24 db.go:40: sql: Scan error on column index 2, name "updated_time": unsupported Scan, storing driver.Value type []uint8 into type *time.Time
+2022/10/14 11:43:46 main.go:66: Logging start
+2022/10/14 11:43:46 main.go:71: DB connect success
+2022/10/14 11:43:51 db.go:40: sql: Scan error on column index 3, name "videoid": converting NULL to string is unsupported
+2022/10/14 11:47:08 main.go:66: Logging start
+2022/10/14 11:47:08 main.go:71: DB connect success
