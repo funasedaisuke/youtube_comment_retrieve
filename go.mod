@@ -3,6 +3,7 @@ module main
 go 1.19
 
 require (
+	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/jmoiron/sqlx v1.3.5
 	google.golang.org/api v0.98.0
@@ -10,7 +11,7 @@ require (
 
 require (
 	cloud.google.com/go/compute v1.10.0 // indirect
-	github.com/caarlos0/env/v6 v6.10.1 // indirect
+	github.com/go-chi/docgen v1.2.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect

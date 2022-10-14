@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"main/db"
 	"main/util"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -14,10 +14,13 @@ import (
 
 	"log"
 
-	"golang.org/x/oauth2/google"
+	"github.com/go-chi/docgen"
+	"github.com/jmoiron/sqlx"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
 )
+
+var dbx *sqlx.DB
 
 func createService(developerKey string) (service *youtube.Service) {
 	ctx := context.Background()
@@ -45,15 +48,9 @@ func getCommentThread(nextPageToken, videoID string, service *youtube.Service, r
 	// body, _ := response.MarshalJSON()
 
 	nextpagetoken = response.NextPageToken
-	// fmt.Println("---------------")
-	// fmt.Println(string(body))
-	// fmt.Println("---------------")
-	// index := 0
+
 	jst, _ := time.LoadLocation("Asia/Tokyo")
 	for _, item := range response.Items {
-		//時間を曜日で分ける
-		//月で分ける
-		//時間で分ける
 
 		commentInstance := db.Comment{}
 		commentInstance.Comment = strings.Replace(item.Snippet.TopLevelComment.Snippet.TextDisplay, "\"", "", -1)
@@ -120,114 +117,88 @@ type VideoData struct {
 	PublishedAt   string
 }
 
-// func getVideoDatas(videoIDs []string, service *youtube.Service) (videoDatas []VideoData) {
-// 	for _, videoID := range videoIDs {
-// 		call := service.Videos.List([]string{"snippet", "statistics"}).Id(videoID)
-// 		response, err := call.Do()
-// 		if err != nil {
-// 			log.Fatalf("Error call YouTube API: %v", err)
-// 		}
-
-// 		item := response.Items[0]
-// 		videoData := VideoData{
-// 			VideoID:       videoID,
-// 			Title:         item.Snippet.Title,
-// 			ViewCount:     item.Statistics.ViewCount,
-// 			LikeCount:     item.Statistics.LikeCount,
-// 			DislikeCount:  item.Statistics.DislikeCount, // ※oauth認証じゃないと取得できない
-// 			FavoriteCount: item.Statistics.FavoriteCount,
-// 			CommentCount:  item.Statistics.CommentCount,
-// 			PublishedAt:   item.Snippet.PublishedAt,
-// 		}
-// 		videoDatas = append(videoDatas, videoData)
-// 	}
-// 	return videoDatas
-// }
-
 func main() {
-	// flag.Parse()
 
-	b, err := ioutil.ReadFile("client_secrets.json")
-	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
-	}
+	//log
+	util.LoggingSetting("system.log")
+	log.Println("Logging start")
 
-	// If modifying these scopes, delete your previously saved credentials
-	// at ~/.credentials/youtube-go-quickstart.json
-	config, err := google.ConfigFromJSON(b, youtube.YoutubeReadonlyScope)
-	if err != nil {
-		log.Fatalf("Unable to parse client secret file to config: %v", err)
-	}
-	videoid := "HK8CzJm8gdM"
-	service := createService(config.ClientID)
-	nextPageToken := ""
-	var responseBodyArray []db.Comment
-	for {
-		responseBodyArray, nextPageToken = getCommentThread(nextPageToken, videoid, service, responseBodyArray)
-		fmt.Println(len(responseBodyArray))
-		if nextPageToken == "" {
-			break
-		}
-	}
-	fmt.Println(len(responseBodyArray))
-	fmt.Println(responseBodyArray)
-	//dbに保存
+	//	database
 	dsn := "root:root@tcp(localhost:3306)/jarujaru"
+	dbx = db.NewMysqlConnect(dsn)
+	log.Println("DB connect success")
 
-	dbx, dberr := db.NewMysqlConnect(dsn)
-	if dberr != nil {
-		fmt.Println("err")
-		panic(dberr)
-	}
 	defer dbx.Close()
 	dbx.SetConnMaxLifetime(time.Minute * 3)
 	dbx.SetMaxOpenConns(10)
 	dbx.SetMaxIdleConns(10)
 
-	db.DbxInsert(dbx, responseBodyArray)
+	//db.DbxInsert(dbx, responseBodyArray)
 
-	query := "select * from jarujaru"
-	db.DbxSelect(dbx, query)
+	//router
+	router := GetRouter()
+	http.ListenAndServe(":8080", router)
+	fmt.Println(docgen.MarkdownRoutesDoc(router, newMarkdownOpts()))
+	fmt.Println("-----------------")
+	fmt.Println(docgen.JSONRoutesDoc(router))
+	fmt.Println("-----------------")
 
-	// call := service.CommentThreads.List([]string{"snippet"}).
-	// 	VideoId(videoid).MaxResults(50)
-	// response, err := call.Do()
-	// handleError(err, "")
-	// fmt.Println(response.Items[0])
-	// if response.NextPageToken != "" {
-	// 	nextPageToken := response.NextPageToken
-	// 	fmt.Printf("nextPageToken: %v\n", nextPageToken)
-	// index := 1
+	//------------------------------------------------------------------------
+
+	// b, err := ioutil.ReadFile("client_secrets.json")
+	// if err != nil {
+	// 	log.Fatalf("Unable to read client secret file: %v", err)
+	// }
+
+	// // If modifying these scopes, delete your previously saved credentials
+	// // at ~/.credentials/youtube-go-quickstart.json
+	// config, err := google.ConfigFromJSON(b, youtube.YoutubeReadonlyScope)
+	// if err != nil {
+	// 	log.Fatalf("Unable to parse client secret file to config: %v", err)
+	// }
+	// videoid := "HK8CzJm8gdM"
+	// service := createService(config.ClientID)
+	// nextPageToken := ""
+	// var responseBodyArray []db.Comment
 	// for {
-	// 	call := service.CommentThreads.List([]string{"snippet"}).
-	// 		VideoId(videoid).
-	// 		PageToken(nextPageToken)
-	// 	response, err := call.Do()
-	// 	handleError(err, "")
-	// 	// fmt.Println(response.Items[0])
-
-	// 	// for _, item := range response.Items {
-	// 	// 	text := item.Snippet.TopLevelComment.Snippet.TextDisplay
-	// 	// 	likeCnt := item.Snippet.TopLevelComment.Snippet.LikeCount
-	// 	// 	time := item.Snippet.TopLevelComment.Snippet.PublishedAt
-	// 	// 	fmt.Printf("Text: %v\n", text)
-	// 	// 	fmt.Printf("likeCnt: %v\n", likeCnt)
-	// 	// 	fmt.Printf("time: %v\n", time)
-	// 	// }
-	// 	nextPageToken := response.NextPageToken
+	// 	responseBodyArray, nextPageToken = getCommentThread(nextPageToken, videoid, service, responseBodyArray)
+	// 	fmt.Println(len(responseBodyArray))
 	// 	if nextPageToken == "" {
 	// 		break
 	// 	}
-	// 	fmt.Printf("nextPageToken: %v\n", nextPageToken)
-	// 	index += 1
-	// 	if index == 3 {
-	// 		break
-	// 	}
-
-	//	}
-
 	// }
+	// fmt.Println(len(responseBodyArray))
+	// fmt.Println(responseBodyArray)
+	// //dbに保存
+	// dsn := "root:root@tcp(localhost:3306)/jarujaru"
 
+	// dbx, dberr := db.NewMysqlConnect(dsn)
+	// if dberr != nil {
+	// 	fmt.Println("err")
+	// 	panic(dberr)
+	// }
+	// defer dbx.Close()
+	// dbx.SetConnMaxLifetime(time.Minute * 3)
+	// dbx.SetMaxOpenConns(10)
+	// dbx.SetMaxIdleConns(10)
+
+	// db.DbxInsert(dbx, responseBodyArray)
+
+	// query := "select * from jarujaru"
+	// db.DbxSelect(dbx, query)
+	//------------------------------------------------------------------------
+
+}
+
+func newMarkdownOpts() docgen.MarkdownOpts {
+	return docgen.MarkdownOpts{
+		ProjectPath:        "github.com/budougumi0617/simple-json-api-by-chi",
+		Intro:              "Sample JSON API server by go-chi.",
+		ForceRelativeLinks: true,
+		URLMap: map[string]string{
+			"github.com/budougumi0617/simple-json-api-by-chi/vendor/github.com/go-chi/chi/": "https://github.com/go-chi/chi/blob/master/",
+		},
+	}
 }
 
 //linkカウントも取得する ok

@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -19,26 +20,25 @@ type Comment struct {
 	Hour_time    int       `json:"hour_time"`
 }
 
-func NewMysqlConnect(dsn string) (*sqlx.DB, error) {
+func NewMysqlConnect(dsn string) *sqlx.DB {
 	DB, err := sqlx.Open("mysql", dsn)
 	if err != nil {
-
-		return nil, err
+		log.Fatal(err)
 	}
 	err = DB.Ping()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return DB, nil
+	return DB
 
 }
-func DbxSelect(dbx *sqlx.DB, query string) {
+func DbxSelect(dbx *sqlx.DB, query string) []Comment {
 	result := []Comment{}
 	//"select * from tests"
 	dbx.Select(&result, query)
-	for _, row := range result {
-		fmt.Println(row)
-	}
+
+	return result
+
 }
 
 func DbxInsert(dbx *sqlx.DB, comments []Comment) {
@@ -74,30 +74,3 @@ func DbxInsert(dbx *sqlx.DB, comments []Comment) {
 // // 	tx.MustExec("insert into tests(name) values(?)", name+strconv.Itoa(id))
 // // }
 // tx.Commit()
-
-func Action() {
-	dsn := "root:root@tcp(localhost:3306)/jarujaru"
-
-	dbx, dberr := NewMysqlConnect(dsn)
-	if dberr != nil {
-		fmt.Println("err")
-		panic(dberr)
-	}
-	defer dbx.Close()
-	dbx.SetConnMaxLifetime(time.Minute * 3)
-	dbx.SetMaxOpenConns(10)
-	dbx.SetMaxIdleConns(10)
-	// jsonbody := `[{ "linkCnt":0,"comment":"good","time": "2022-06-25T00:22:50Z"},{ "linkCnt":2,"comment":"nice","time": "2022-06-25T00:22:50Z"}]`
-	// DbxInsert(dbx, jsonbody)
-	// query := "select * from jarujaru"
-	// DbxSelect(dbx, query)
-
-	fmt.Println("succsess")
-
-	//インクリメントIDを更新するときの書き方
-	//jarajaruの動画コメントを保存するために必要な体制を巣作る
-	//取得したデータのテスト jsonファイルを作る。
-	//構造体を作る
-	//保存する
-
-}
